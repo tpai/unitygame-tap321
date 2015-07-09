@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 
 public class BallSpawner : MonoBehaviour {
@@ -20,49 +21,45 @@ public class BallSpawner : MonoBehaviour {
 
 	private int m_amt;
 	private float m_wait;
+	public float OffsetTime { get { return m_wait; } }
 	private float m_exploTime;
 
 	public void SpawnBall () {
 
+		SoundManager.instance.SetSong (Level.instance.Now);
+
 		switch (Level.instance.Now) {
 		case 1:
-			m_amt = 20;
 			m_wait = .5f;
 			m_exploTime = 3f;
 			break;
 		case 2:
-			m_amt = 30;
 			m_wait = .4f;
 			m_exploTime = 2.5f;
 			break;
 		case 3:
-			m_amt = 40;
 			m_wait = .3f;
 			m_exploTime = 2f;
 			break;
 		case 4:
-			m_amt = 100;
 			m_wait = .2f;
 			m_exploTime = 1.5f;
 			break;
-		case 5:
-			m_amt = 20;
-			m_wait = .15f;
-			m_exploTime = 1.3f;
-			break;
+//		case 5:
+//			m_wait = .15f;
+//			m_exploTime = 1.3f;
+//			break;
 		default:
 			goto case 4;
 		}
-
+		m_amt = Convert.ToInt32(Mathf.Floor(SoundManager.instance.GetSongTime () / m_wait));
+		Debug.Log (m_amt);
 		StartCoroutine ("Spawn", m_amt);
-		InvokeRepeating ("IsAnyBallExist", 1f, 1f);
 	}
 
-	void IsAnyBallExist () {
-		if (transform.childCount == 0) {
-			CancelInvoke ("IsAnyBallExist");
-			Level.instance.Next (); // next level
-		}
+	void ReadyToNextLevel () {
+		CancelInvoke ("IsAnyBallExist");
+		Level.instance.Next (); // next level
 	}
 	
 	IEnumerator Spawn (int amt) {
@@ -71,14 +68,15 @@ public class BallSpawner : MonoBehaviour {
 			GameObject ball = (GameObject)Instantiate (
 				ballPrefab, 
 				new Vector3 (
-					Random.Range (-2.5f, 2.5f),
-					Random.Range (-4f, 4f),
+					UnityEngine.Random.Range (-2.5f, 2.5f),
+					UnityEngine.Random.Range (-4f, 4f),
 					0f
 				),
 				Quaternion.identity
 			);
 			ball.transform.parent = transform;
 			ball.GetComponent<Ball>().exploTime = m_exploTime;
+			if (i == amt - 1)ReadyToNextLevel ();
 		}
 	}
 

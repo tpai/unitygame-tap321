@@ -28,8 +28,4 @@ public class Ball : MonoBehaviour {
 			Destroy (gameObject);
 		}
 	}
-
-	void AddScore () {
-		Score.instance.Add (Convert.ToInt32(exploTime * UnityEngine.Random.Range(100f, 200f)));
-	}
 }
